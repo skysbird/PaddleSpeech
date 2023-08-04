@@ -18,6 +18,7 @@ from pathlib import Path
 import librosa
 import numpy as np
 import pypinyin
+import threading
 from praatio import textgrid
 
 from paddlespeech.t2s.exps.ernie_sat.utils import get_dict
@@ -30,6 +31,7 @@ MODEL_DIR_ZH = 'tools/aligner/aishell3_model.zip'
 MFA_PATH = 'tools/montreal-forced-aligner/bin'
 os.environ['PATH'] = MFA_PATH + '/:' + os.environ['PATH']
 
+_lock = threading.Lock()
 
 def _get_max_idx(dic):
     return sorted([int(key.split('_')[0]) for key in dic.keys()])[-1]
@@ -107,7 +109,7 @@ def alignment(wav_path: str,
     wav_name = os.path.basename(wav_path)
     utt = wav_name.split('.')[0]
     # prepare data for MFA
-    tmp_name = get_tmp_name(text=text)
+    tmp_name = get_tmp_name(text=text+"_"+utt)
     tmpbase = './tmp_dir/' + tmp_name
     tmpbase = Path(tmpbase)
     tmpbase.mkdir(parents=True, exist_ok=True)
@@ -129,10 +131,20 @@ def alignment(wav_path: str,
     else:
         print('please input right lang!!')
 
+    tg_path = str(tmpbase) + '/' + tmp_name + '/' + utt + '.TextGrid'
+
+    #while not os.path.exists(tg_path):
+    print(_lock)
+    #with _lock:
     CMD = 'mfa_align' + ' ' + str(
         tmpbase) + ' ' + DICT + ' ' + MODEL_DIR + ' ' + str(tmpbase)
-    os.system(CMD)
-    tg_path = str(tmpbase) + '/' + tmp_name + '/' + utt + '.TextGrid'
+    result = os.system(CMD)
+
+    print(CMD,result,flush=True)
+    #tg_path = str(tmpbase) + '/' + utt + '.TextGrid'
+    #print(tmpbase)
+    #print(tmp_name)
+    print(tg_path,flush=True)
     phn_dur, word2phns = _readtg(tg_path, lang=lang)
     phn_dur = phn_dur.split()
     phns = phn_dur[::2]

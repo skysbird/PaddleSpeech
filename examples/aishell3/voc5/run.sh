@@ -3,13 +3,13 @@
 set -e
 source path.sh
 
-gpus=0
+gpus=0,1
 stage=0
 stop_stage=100
 
 conf_path=conf/default.yaml
 train_output_path=exp/default
-ckpt_name=snapshot_iter_5000.pdz
+ckpt_name=snapshot_iter_14000.pdz
 
 # with the following command, you can choose the stage range you want to run
 # such as `./run.sh --stage 0 --stop-stage 0`

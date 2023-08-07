@@ -1,6 +1,6 @@
 #!/bin/bash
 
-stage=0
+stage=4
 stop_stage=100
 
 config_path=$1
@@ -34,7 +34,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "Extract features ..."
     python3 ${BIN_DIR}/preprocess.py \
         --dataset=aishell3 \
-        --rootdir=~/datasets/data_aishell3/ \
+        --rootdir=~/work/sky/dataset/ \
         --dumpdir=dump \
         --dur-file=durations.txt \
         --config=${config_path} \
@@ -47,7 +47,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     echo "Extract features ..."
     python3 ${BIN_DIR}/preprocess.py \
         --dataset=vctk \
-        --rootdir=~/datasets/VCTK-Corpus-0.92/ \
+        --rootdir=~/work/sky/dataset/VCTK/ \
         --dumpdir=dump \
         --dur-file=durations.txt \
         --config=${config_path} \

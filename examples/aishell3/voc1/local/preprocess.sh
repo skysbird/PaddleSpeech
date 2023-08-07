@@ -18,13 +18,13 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     # extract features
     echo "Extract features ..."
     python3 ${BIN_DIR}/../preprocess.py \
-        --rootdir=~/datasets/data_aishell3/ \
+        --rootdir=~/work/sky/dataset \
         --dataset=aishell3 \
         --dumpdir=dump \
         --dur-file=durations.txt \
         --config=${config_path} \
         --cut-sil=True \
-        --num-cpu=20
+        --num-cpu=30
 fi
 
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then

@@ -14,8 +14,8 @@ window: "hann"     # Window function.
 
 # Only used for feats_type != raw
 
-fmin: 80           # Minimum frequency of Mel basis.
-fmax: 7600         # Maximum frequency of Mel basis.
+fmin: 50           # Minimum frequency of Mel basis.
+fmax: 8600         # Maximum frequency of Mel basis.
 n_mels: 80         # The number of mel basis.
 
 mean_phn_span: 8
@@ -82,7 +82,7 @@ grad_clip: 1.0
 ###########################################################
 #                     TRAINING SETTING                    #
 ###########################################################
-max_epoch: 1500
+max_epoch: 5000000
 num_snapshots: 50
 
 ###########################################################

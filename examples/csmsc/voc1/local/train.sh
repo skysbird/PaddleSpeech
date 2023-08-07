@@ -10,4 +10,4 @@ python ${BIN_DIR}/train.py \
     --dev-metadata=dump/dev/norm/metadata.jsonl \
     --config=${config_path} \
     --output-dir=${train_output_path} \
-    --ngpu=1
+    --ngpu=2

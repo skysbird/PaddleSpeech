@@ -18,7 +18,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     # extract features
     echo "Extract features ..."
     python3 ${BIN_DIR}/../preprocess.py \
-        --rootdir=~/datasets/VCTK-Corpus-0.92/ \
+        --rootdir=~/work/sky/dataset/VCTK \
         --dataset=vctk \
         --dumpdir=dump \
         --dur-file=durations.txt \

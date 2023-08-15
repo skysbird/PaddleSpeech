@@ -1,6 +1,6 @@
 #!/bin/bash
 
-stage=4
+stage=3
 stop_stage=100
 
 config_path=$1
@@ -16,6 +16,13 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     # get durations from MFA's result
+    echo "Generate durations.txt from MFA results for libritts ..."
+    python3 ${MAIN_ROOT}/utils/gen_duration_from_textgrid.py \
+        --inputdir=./libritts_alignment \
+        --output durations_libritts.txt \
+        --config=${config_path}
+
+    # get durations from MFA's result
     echo "Generate durations.txt from MFA results for vctk ..."
     python3 ${MAIN_ROOT}/utils/gen_duration_from_textgrid.py \
         --inputdir=./vctk_alignment \
@@ -23,10 +30,26 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
         --config=${config_path}
 fi
 
+
+
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     # get durations from MFA's result
     echo "concat durations_aishell3.txt and durations_vctk.txt to durations.txt"
-    cat durations_aishell3.txt durations_vctk.txt > durations.txt
+    cat durations_aishell3.txt durations_vctk.txt durations_libritts > durations.txt
+fi
+
+
+if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
+    # extract features
+    echo "Extract features ..."
+    python3 ${BIN_DIR}/preprocess.py \
+        --dataset=libritts \
+        --rootdir=LibriTTS \
+        --dumpdir=dump \
+        --dur-file=durations.txt \
+        --config=${config_path} \
+        --num-cpu=20 \
+        --cut-sil=True
 fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then

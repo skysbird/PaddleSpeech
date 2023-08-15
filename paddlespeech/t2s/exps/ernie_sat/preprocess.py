@@ -284,6 +284,17 @@ def main():
                 test_wav_files += wav_files[-sub_num_dev:]
             else:
                 train_wav_files += wav_files
+    elif args.dataset == "libritts":
+        wav_files = sorted(rootdir.rglob("*.wav"))
+        #375086
+        #print(len(wav_files))
+        # split data into 3 sections
+        num_train = 370000
+        num_dev = 2500
+        train_wav_files = wav_files[:num_train]
+        dev_wav_files = wav_files[num_train:num_train + num_dev]
+        test_wav_files = wav_files[num_train + num_dev:]
+
 
     else:
         print("dataset should in {baker, aishell3, ljspeech, vctk} now!")

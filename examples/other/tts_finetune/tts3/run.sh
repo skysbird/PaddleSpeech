@@ -4,7 +4,7 @@ set -e
 source path.sh
 
 
-input_dir=./input/csmsc_mini
+input_dir=./cusdata
 newdir_name="newdir"
 new_dir=${input_dir}/${newdir_name}
 pretrained_model_dir=./pretrained_models/fastspeech2_aishell3_ckpt_1.1.0
@@ -16,7 +16,7 @@ ngpu=1
 finetune_config=./conf/finetune.yaml
 replace_spkid=0
 
-ckpt=snapshot_iter_96699
+ckpt=snapshot_iter_96400
 
 gpus=1
 CUDA_VISIBLE_DEVICES=${gpus}

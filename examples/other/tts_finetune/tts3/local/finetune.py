@@ -195,8 +195,8 @@ def train_sp(args, config):
         model, dev_dataloader, output_dir=output_dir, **config["updater"])
 
     if dist.get_rank() == 0:
-        trainer.extend(evaluator, trigger=(1, "epoch"))
-        trainer.extend(VisualDL(output_dir), trigger=(1, "iteration"))
+        trainer.extend(evaluator, trigger=(100, "epoch"))
+        trainer.extend(VisualDL(output_dir), trigger=(100, "iteration"))
     trainer.extend(
         Snapshot(max_size=config.num_snapshots), trigger=(1, 'epoch'))
     trainer.run()

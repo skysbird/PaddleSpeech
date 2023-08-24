@@ -81,7 +81,7 @@ def prep_feats_with_dur(wav_path: str,
     span_to_add = phns_spans_outs['span_to_add']
 
     # 中文的 phns 不一定都在 fastspeech2 的字典里, 用 sp 代替
-    if target_lang in {'en', 'zh'}:
+    if target_lang in {'en', 'zh','thai'}:
         old_durs = eval_durs(old_phns, target_lang=source_lang)
     else:
         assert target_lang in {'en', 'zh'}, \
@@ -96,7 +96,7 @@ def prep_feats_with_dur(wav_path: str,
     else:
         d_factor = 1
 
-    if target_lang in {'en', 'zh'}:
+    if target_lang in {'en', 'zh', 'thai'}:
         new_durs = eval_durs(new_phns, target_lang=target_lang)
     else:
         assert target_lang == "zh" or target_lang == "en", \

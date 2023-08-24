@@ -15,10 +15,10 @@ output_dir=./exp/default
 lang=zh
 ngpu=1
 finetune_config=./conf/finetune.yaml
+#replace_spkid=170  # csmsc: 174, ljspeech: 175, aishell3: 0~173, vctk: 176
 replace_spkid=174  # csmsc: 174, ljspeech: 175, aishell3: 0~173, vctk: 176
 
-ckpt=snapshot_iter_109200
-
+ckpt=snapshot_iter_146000
 gpus=1
 CUDA_VISIBLE_DEVICES=${gpus}
 stage=0
@@ -84,7 +84,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         --dump_dir=${dump_dir} \
         --output_dir=${output_dir} \
         --ngpu=${ngpu} \
-        --epoch=100000 \
+        --epoch=10000000 \
         --finetune_config=${finetune_config}
 fi
 
@@ -106,10 +106,27 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
     #    --phones_dict=${dump_dir}/phone_id_map.txt \
     #    --speaker_dict=${dump_dir}/speaker_id_map.txt \
     #    --spk_id=$replace_spkid
+    #python3 ${BIN_DIR}/../synthesize_e2e.py \
+    #    --am=fastspeech2_aishell3 \
+    #    --am_config=${pretrained_model_dir}/default.yaml \
+    #    --am_ckpt=${output_dir}/checkpoints/${ckpt}.pdz \
+    #    --am_stat=${pretrained_model_dir}/speech_stats.npy \
+    #    --voc=pwgan_vctk \
+    #    --voc_config=pwg_vctk_ckpt_0.5/pwg_default.yaml \
+    #    --voc_ckpt=pwg_vctk_ckpt_0.5/pwg_snapshot_iter_1000000.pdz \
+    #    --voc_stat=pwg_vctk_ckpt_0.5/pwg_stats.npy \
+    #    --lang=mix \
+    #    --text=${BIN_DIR}/../../assets/sentences_mix.txt \
+    #    --output_dir=./test_e2e/ \
+    #    --phones_dict=${dump_dir}/phone_id_map.txt \
+    #    --speaker_dict=${dump_dir}/speaker_id_map.txt \
+    #    --spk_id=$replace_spkid
+
+        #--am_ckpt=${pretrained_model_dir}/snapshot_iter_99200.pdz \
     python3 ${BIN_DIR}/../synthesize_e2e.py \
         --am=fastspeech2_aishell3 \
         --am_config=${pretrained_model_dir}/default.yaml \
-        --am_ckpt=${output_dir}/checkpoints/${ckpt}.pdz \
+        --am_ckpt=snapshot_iter_320000.pdz \
         --am_stat=${pretrained_model_dir}/speech_stats.npy \
         --voc=pwgan_vctk \
         --voc_config=pwg_vctk_ckpt_0.5/pwg_default.yaml \
@@ -121,21 +138,6 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
         --phones_dict=${dump_dir}/phone_id_map.txt \
         --speaker_dict=${dump_dir}/speaker_id_map.txt \
         --spk_id=$replace_spkid
-    #python3 ${BIN_DIR}/../synthesize_e2e.py \
-    #    --am=fastspeech2_aishell3 \
-    #    --am_config=${pretrained_model_dir}/default.yaml \
-    #    --am_ckpt=${output_dir}/checkpoints/${ckpt}.pdz \
-    #    --am_stat=${pretrained_model_dir}/speech_stats.npy \
-    #    --voc=pwgan_vctk \
-    #    --voc_config=voc1/exp/default/default.yaml \
-    #    --voc_ckpt=voc1/exp/default/checkpoints/snapshot_iter_1000150.pdz \
-    #    --voc_stat=voc1/dump/train/feats_stats.npy \
-    #    --lang=mix \
-    #    --text=${BIN_DIR}/../../assets/sentences_mix.txt \
-    #    --output_dir=./test_e2e/ \
-    #    --phones_dict=${dump_dir}/phone_id_map.txt \
-    #    --speaker_dict=${dump_dir}/speaker_id_map.txt \
-    #    --spk_id=$replace_spkid
 fi
 
 

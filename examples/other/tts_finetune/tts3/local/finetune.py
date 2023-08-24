@@ -195,10 +195,10 @@ def train_sp(args, config):
         model, dev_dataloader, output_dir=output_dir, **config["updater"])
 
     if dist.get_rank() == 0:
-        trainer.extend(evaluator, trigger=(100, "epoch"))
-        trainer.extend(VisualDL(output_dir), trigger=(100, "iteration"))
+        trainer.extend(evaluator, trigger=(1000, "epoch"))
+        trainer.extend(VisualDL(output_dir), trigger=(1000, "iteration"))
     trainer.extend(
-        Snapshot(max_size=config.num_snapshots), trigger=(1, 'epoch'))
+        Snapshot(max_size=config.num_snapshots), trigger=(1000, 'epoch'))
     trainer.run()
 
 
@@ -254,6 +254,7 @@ if __name__ == '__main__':
     config.batch_size = finetune_config.batch_size if finetune_config.batch_size > 0 else config.batch_size
     config.optimizer.learning_rate = finetune_config.learning_rate if finetune_config.learning_rate > 0 else config.optimizer.learning_rate
     config.num_snapshots = finetune_config.num_snapshots if finetune_config.num_snapshots > 0 else config.num_snapshots
+    config.fs = finetune_config.fs
     frozen_layers = finetune_config.frozen_layers
     assert type(frozen_layers) == list, "frozen_layers should be set a list."
 

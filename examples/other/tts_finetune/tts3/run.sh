@@ -4,7 +4,7 @@ set -e
 source path.sh
 
 
-input_dir=./cusdata
+input_dir=./cusdata_c
 newdir_name="newdir"
 new_dir=${input_dir}/${newdir_name}
 pretrained_model_dir=./pretrained_models/fastspeech2_aishell3_ckpt_1.1.0
@@ -82,7 +82,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         --dump_dir=${dump_dir} \
         --output_dir=${output_dir} \
         --ngpu=${ngpu} \
-        --epoch=100 \
+        --epoch=1000000 \
         --finetune_config=${finetune_config}
 fi
 

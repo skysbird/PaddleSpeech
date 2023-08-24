@@ -7,6 +7,13 @@ batch_size: -1
 learning_rate: 0.0001     # learning rate
 num_snapshots: -1
 
+fs: 24000          # sr
+
+fmin: 80           # Minimum frequency of Mel basis.
+fmax: 7600         # Maximum frequency of Mel basis.
+n_mels: 80         # The number of mel basis.
+
+
 # frozen_layers should be a list
 # if you don't need to freeze, set frozen_layers to []
 # fastspeech2 layers can be found on conf/fastspeech2_layers.txt

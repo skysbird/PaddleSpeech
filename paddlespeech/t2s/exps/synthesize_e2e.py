@@ -20,6 +20,8 @@ import soundfile as sf
 import yaml
 from timer import timer
 from yacs.config import CfgNode
+import numpy as np
+import torch
 
 from paddlespeech.t2s.exps.syn_utils import am_to_static
 from paddlespeech.t2s.exps.syn_utils import get_am_inference
@@ -135,7 +137,7 @@ def evaluate(args):
                 lang=args.lang,
                 svs_input=svs_input)
             phone_ids = frontend_dict['phone_ids']
-            # pprint(f"{utt_id} {phone_ids}")
+            pprint(f"{utt_id} {phone_ids}")
 
             with paddle.no_grad():
                 flags = 0
@@ -146,13 +148,21 @@ def evaluate(args):
                     # acoustic model
                     if am_name == 'fastspeech2':
                         # multi speaker
-                        if am_dataset in {"aishell3", "vctk", "mix", "canton"}:
+                        if am_dataset in {"aishell3", "vctk", "mix", "canton","cv"}:
                             # multi-speaker
                             spk_id = paddle.to_tensor([args.spk_id])
                             mel = am_inference(part_phone_ids, spk_id)
                         else:
                             # single-speaker
+                            #print(part_phone_ids)
                             mel = am_inference(part_phone_ids)
+                            #meln = np.load("/data/sky/PaddleSpeech/examples/thai/tts3/dump/train/norm/data_speech/common_voice_th_23646664_speech.npy")
+                            #print(meln)
+#                            meln = np.load("/data/sky/PaddleSpeech/examples/aishell3/tts3/dump/dev/norm/data_speech/SSB00330505_speech.npy")
+
+                            #mel = meln
+                            #print(mel)
+
                     elif am_name == 'speedyspeech':
                         part_tone_ids = frontend_dict['tone_ids'][i]
                         if am_dataset in {"aishell3", "vctk", "mix"}:
@@ -175,6 +185,11 @@ def evaluate(args):
                             note_dur=part_note_durs,
                             is_slur=part_is_slurs, )
 
+                    np_var = mel.cpu().numpy() # 数据类型转换
+                    #np_var = mel
+                    #print("mean",type(np_var))
+                    np.save(str(output_dir / (utt_id + ".npy")), np_var)
+                    #print(mel)
                     # vocoder
                     wav = voc_inference(mel)
                     if flags == 0:
@@ -214,6 +229,7 @@ def parse_args():
         choices=[
             'speedyspeech_csmsc',
             'speedyspeech_aishell3',
+            'fastspeech2_cv',
             'fastspeech2_csmsc',
             'fastspeech2_ljspeech',
             'fastspeech2_aishell3',
@@ -290,7 +306,7 @@ def parse_args():
         '--lang',
         type=str,
         default='zh',
-        choices=['zh', 'en', 'mix', 'canton', 'sing'],
+        choices=['zh', 'en', 'mix', 'canton', 'sing','thai'],
         help='Choose model language. zh or en or mix')
 
     parser.add_argument(

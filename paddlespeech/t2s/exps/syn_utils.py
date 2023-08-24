@@ -34,6 +34,7 @@ from paddlespeech.t2s.datasets.am_batch_fn import *
 from paddlespeech.t2s.datasets.data_table import DataTable
 from paddlespeech.t2s.datasets.vocoder_batch_fn import Clip_static
 from paddlespeech.t2s.frontend.canton_frontend import CantonFrontend
+from paddlespeech.t2s.frontend.thai_frontend import Thai
 from paddlespeech.t2s.frontend.en_frontend import English
 from paddlespeech.t2s.frontend.mix_frontend import MixFrontend
 from paddlespeech.t2s.frontend.sing_frontend import SingFrontend
@@ -305,6 +306,8 @@ def get_frontend(lang: str='zh',
     elif lang == 'sing':
         frontend = SingFrontend(
             pinyin_phone_path=pinyin_phone, phone_vocab_path=phones_dict)
+    elif lang == 'thai':
+        frontend = Thai(phone_vocab_path=phones_dict)
     else:
         print("wrong lang!")
     return frontend
@@ -363,6 +366,11 @@ def run_frontend(
         outs.update({'note_ids': note_ids})
         outs.update({'note_durs': note_durs})
         outs.update({'is_slurs': is_slurs})
+    elif lang == 'thai':
+        input_ids = frontend.get_input_ids(
+            text, merge_sentences=merge_sentences, to_tensor=to_tensor)
+        phone_ids = input_ids["phone_ids"]
+
     else:
         print("lang should in {'zh', 'en', 'mix', 'canton', 'sing'}!")
 

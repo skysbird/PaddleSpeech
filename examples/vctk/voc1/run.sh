@@ -4,7 +4,7 @@ set -e
 source path.sh
 
 gpus=0,1
-stage=1
+stage=0
 stop_stage=100
 
 conf_path=conf/default.yaml

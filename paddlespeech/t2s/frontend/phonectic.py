@@ -28,7 +28,7 @@ from paddlespeech.t2s.frontend.zh_normalization.text_normlization import TextNor
 # discard opencc untill we find an easy solution to install it on windows
 # from opencc import OpenCC
 
-__all__ = ["Phonetics", "English", "EnglishCharacter", "Chinese"]
+__all__ = ["Phonetics", "English", "EnglishCharacter", "Chinese", 'Thai']
 
 
 class Phonetics(ABC):
@@ -110,7 +110,9 @@ class English(Phonetics):
         phones_list = []
         temp_phone_ids = []
         for sentence in sentences:
+            #print(sentence)
             phones = self.phoneticize(sentence)
+            #print(phones)
             # remove start_symbol and end_symbol
             phones = phones[1:-1]
             phones = [phn for phn in phones if not phn.isspace()]
@@ -140,7 +142,6 @@ class English(Phonetics):
 
         result = {}
         result["phone_ids"] = temp_phone_ids
-
         return result
 
     def numericalize(self, phonemes):
@@ -318,3 +319,164 @@ class Chinese(Phonetics):
             List[str]: The list of pronunciation sequence.
         """
         return [self.vocab.reverse(i) for i in ids]
+
+
+from pythainlp.transliterate import transliterate
+#aa = transliterate("แมว")  # output: 'mɛːw'
+#print(aa)
+
+class ThaiG2p():
+    
+    def __init__(self):
+        self.phonemes = [
+
+        ]
+        pass
+
+
+    def __call__(self,text):
+        return transliterate(text)
+    
+
+class Thai(Phonetics):
+
+    LEXICON = {
+        # key using lowercase
+    }
+
+    def _get_all_syllables(self,phone_vocab_path):
+        all_syllables = set()
+        with open(phone_vocab_path) as f:
+            lines = f.readlines() 
+            for l in lines:
+                p = l.split(" ")[0]
+                all_syllables.add(p)
+
+        return list(all_syllables)
+    
+
+
+    def __init__(self, phone_vocab_path=None):
+        self.backend = ThaiG2p()
+        #self.backend.cmu.update(English.LEXICON)
+        self.phonemes = list(self._get_all_syllables(phone_vocab_path))
+        self.punctuations = get_punctuations("en")
+        self.vocab = Vocab(self.phonemes + self.punctuations)
+        #self.vocab = Vocab( self.punctuations)
+        print(self.vocab)
+        self.vocab_phones = {}
+        self.punc = "、：，；。？！“”‘’':,;.?!"
+        self.text_normalizer = TextNormalizer()
+        if phone_vocab_path:
+            with open(phone_vocab_path, 'rt', encoding='utf-8') as f:
+                phn_id = [line.strip().split() for line in f.readlines()]
+            for phn, id in phn_id:
+                self.vocab_phones[phn] = int(id)
+
+    def phoneticize(self, sentence):
+        """ Normalize the input text sequence and convert it into pronunciation sequence.
+        Args:
+            sentence (str): The input text sequence.
+        Returns: 
+            List[str]: The list of pronunciation sequence.
+        """
+        start = self.vocab.start_symbol
+        end = self.vocab.end_symbol
+        s = self.backend(sentence)
+        s = s.replace("ː ","ː")
+        print(s)
+        #print(s.strip().split(" "))
+        #s = "tɕʰ iː˦˥ s a˨˩ n a˦˥ n ʔ a˨˩ r ɔ˨˩ j d oː˧ j tɕʰ a˨˩ pʰ ɔ˦˥ ʔ j aː˨˩ ŋ j i˥˩ ŋ m ɯa˥˩ m aː˧ pʰ r ɔː˦˥ m k a˨˩ p̚ kʰ a˨˩ n o˩˩˦ m p a˧ ŋ s ɛː˩˩˦ n ʔ a˨˩ r ɔ˨˩ j k r ɔː˨˩ p̚"
+        phonemes = ([] if start is None else [start]) \
+                   + s.strip().split(" ") \
+                   + ([] if end is None else [end])
+        #phonemes = [item for item in phonemes if item in self.vocab.stoi]
+        return phonemes
+
+    def _p2id(self, phonemes: List[str]) -> np.array:
+        phone_ids = [self.vocab_phones[item] for item in phonemes]
+        return np.array(phone_ids, np.int64)
+
+    def get_input_ids(self,
+                      sentence: str,
+                      merge_sentences: bool=False,
+                      to_tensor: bool=True) -> paddle.Tensor:
+        sentences = self.text_normalizer._split(sentence, lang="en")
+
+        phones_list = []
+        temp_phone_ids = []
+        for sentence in sentences:
+            print(sentence)
+            phones = self.phoneticize(sentence)
+            print(phones)
+            # remove start_symbol and end_symbol
+            phones = phones[1:-1]
+            phones = [phn for phn in phones if not phn.isspace()]
+            # replace unk phone with sp
+            phones = [
+                phn
+                if (phn in self.vocab_phones and phn not in self.punc) else "sp"
+                for phn in phones
+            ]
+            if len(phones) != 0:
+                phones_list.append(phones)
+
+        if merge_sentences:
+            merge_list = sum(phones_list, [])
+            # rm the last 'sp' to avoid the noise at the end
+            # cause in the training data, no 'sp' in the end
+            if merge_list[-1] == 'sp':
+                merge_list = merge_list[:-1]
+            phones_list = []
+            phones_list.append(merge_list)
+
+        for part_phones_list in phones_list:
+            print(part_phones_list)
+            phone_ids = self._p2id(part_phones_list)
+            print(phone_ids)
+            if to_tensor:
+                phone_ids = paddle.to_tensor(phone_ids)
+            temp_phone_ids.append(phone_ids)
+
+        result = {}
+        result["phone_ids"] = temp_phone_ids
+
+        return result
+
+    def numericalize(self, phonemes):
+        """ Convert pronunciation sequence into pronunciation id sequence.
+        Args:
+            phonemes (List[str]): The list of pronunciation sequence.
+        Returns: 
+            List[int]: The list of pronunciation id sequence.
+        """
+        ids = [
+            self.vocab.lookup(item) for item in phonemes
+            if item in self.vocab.stoi
+        ]
+        return ids
+
+    def reverse(self, ids):
+        """ Reverse the list of pronunciation id sequence to a list of pronunciation sequence.
+        Args:
+            ids (List[int]): The list of pronunciation id sequence.
+        Returns: 
+            List[str]: The list of pronunciation sequence.
+        """
+        return [self.vocab.reverse(i) for i in ids]
+
+    def __call__(self, sentence):
+        """ Convert the input text sequence into pronunciation id sequence.
+        Args:
+            sentence(str): The input text sequence.
+        Returns: 
+            List[str]: The list of pronunciation id sequence.
+        """
+        return self.numericalize(self.phoneticize(sentence))
+
+    @property
+    def vocab_size(self):
+        """ Vocab size.
+        """
+        return len(self.vocab)
+

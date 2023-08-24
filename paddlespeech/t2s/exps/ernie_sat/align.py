@@ -26,8 +26,12 @@ from paddlespeech.t2s.exps.ernie_sat.utils import get_tmp_name
 
 DICT_EN = 'tools/aligner/cmudict-0.7b'
 DICT_ZH = 'tools/aligner/simple.lexicon'
+DICT_THAI = 'tts3/mfa/thai/pretrain/thai_cv.dict'
+
 MODEL_DIR_EN = 'tools/aligner/vctk_model.zip'
 MODEL_DIR_ZH = 'tools/aligner/aishell3_model.zip'
+MODEL_DIR_THAI = 'tts3/mfa/thai/pretrain/thai_mfa.zip '
+
 MFA_PATH = 'tools/montreal-forced-aligner/bin'
 os.environ['PATH'] = MFA_PATH + '/:' + os.environ['PATH']
 
@@ -43,11 +47,11 @@ def _readtg(tg_path: str, lang: str='en', fs: int=24000, n_shift: int=300):
     ends = []
     words = []
 
-    for interval in alignment.tierDict['words'].entryList:
+    for interval in alignment.getTier('words').entries:
         word = interval.label
         if word:
             words.append(word)
-    for interval in alignment.tierDict['phones'].entryList:
+    for interval in alignment.getTier('phones').entries:
         phone = interval.label
         phones.append(phone)
         ends.append(interval.end)
@@ -92,6 +96,8 @@ def _readtg(tg_path: str, lang: str='en', fs: int=24000, n_shift: int=300):
             non_sp_idx += 1
             i += len(phns)
         word_idx += 1
+
+    print(word2phns)
     sum_phn = sum(len(word2phns[k]) for k in word2phns)
     assert sum_phn == len(phones)
 
@@ -128,6 +134,9 @@ def alignment(wav_path: str,
     elif lang == 'zh':
         DICT = DICT_ZH
         MODEL_DIR = MODEL_DIR_ZH
+    elif lang == 'thai':
+        DICT = DICT_THAI
+        MODEL_DIR = MODEL_DIR_THAI
     else:
         print('please input right lang!!')
 
@@ -195,6 +204,8 @@ def words2phns(text: str, lang='en'):
         dictfile = DICT_EN
     elif lang == 'zh':
         dictfile = DICT_ZH
+    elif lang == 'thai':
+        dictfile = DICT_THAI
     else:
         print('please input right lang!!')
 
@@ -251,11 +262,24 @@ def get_phns_spans(wav_path: str,
             phns_origin, origin_w2p = words2phns(str_origin, lang='zh')
             # clone 句子 
             phns_append, append_w2p_tmp = words2phns(str_append, lang='en')
+
+        elif target_lang == 'thai':
+            # 原始句子
+            phns_origin, origin_w2p = words2phns(str_origin, lang=source_lang)
+            # clone 句子 
+            phns_append, append_w2p_tmp = words2phns(str_append, lang=target_lang)
+
+            phns_append = "tɕʰ iː˦˥ s a˨˩ n a˦˥ n ʔ a˨˩ r ɔ˨˩ j d oː˧ j tɕʰ a˨˩ pʰ ɔ˦˥ ʔ j aː˨˩ ŋ j i˥˩ ŋ m ɯa˥˩ m aː˧ pʰ r ɔː˦˥ m k a˨˩ p̚ kʰ a˨˩ n o˩˩˦ m p a˧ ŋ s ɛː˩˩˦ n ʔ a˨˩ r ɔ˨˩ j k r ɔː˨˩ p̚".split(" ")
+
+            print("new phs=",phns_append)
+
+
         else:
             assert target_lang == 'zh' or target_lang == 'en', \
                 'cloning is not support for this language, please check it.'
 
         new_phns = phns_origin + phns_append
+        print("new=",new_phns)
 
         append_w2p = {}
         length = len(origin_w2p)

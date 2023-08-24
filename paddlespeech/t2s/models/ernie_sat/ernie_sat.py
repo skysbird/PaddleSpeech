@@ -692,6 +692,8 @@ class ErnieSAT(nn.Layer):
             text_seg_pos: paddle.Tensor,
             span_bdy: List[int],
             use_teacher_forcing: bool=True, ) -> Dict[str, paddle.Tensor]:
+
+        print("model=",self.model)
         return self.model.inference(
             speech=speech,
             text=text,
@@ -734,6 +736,8 @@ class ErnieSATInference(nn.Layer):
 
         normed_mel_pre, normed_mel_masked, normed_mel_post = outs
         logmel_pre = self.normalizer.inverse(normed_mel_pre)
+        print("m=",normed_mel_masked)
         logmel_masked = self.normalizer.inverse(normed_mel_masked)
+
         logmel_post = self.normalizer.inverse(normed_mel_post)
         return logmel_pre, logmel_masked, logmel_post

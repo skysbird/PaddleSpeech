@@ -30,4 +30,6 @@ class ZScore(nn.Layer):
     def inverse(self, x):
         # NOTE: to be compatible with paddle's to_static, we must explicitly
         # call multiply, or add, etc, instead of +-*/, etc.
+        print("x=",x)
+        print("sig=",self.sigma)
         return paddle.add(paddle.multiply(x, self.sigma), self.mu)

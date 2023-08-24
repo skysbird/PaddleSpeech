@@ -193,11 +193,11 @@ def eval_durs(phns, target_lang: str='zh', fs: int=24000, n_shift: int=300):
         phones_dict = "download/fastspeech2_conformer_baker_ckpt_0.5/phone_id_map.txt"
 
     elif target_lang == 'thai':
-        am = "fastspeech2_ljspeech"
-        am_config = "download/fastspeech2_nosil_ljspeech_ckpt_0.5/default.yaml"
-        am_ckpt = "download/fastspeech2_nosil_ljspeech_ckpt_0.5/snapshot_iter_100000.pdz"
-        am_stat = "download/fastspeech2_nosil_ljspeech_ckpt_0.5/speech_stats.npy"
-        phones_dict = "download/fastspeech2_nosil_ljspeech_ckpt_0.5/phone_id_map.txt"
+        am = "fastspeech2_cv"
+        am_config = "tts3/conf/default.yaml"
+        am_ckpt = "tts3/exp/default/checkpoints/snapshot_iter_32780.pdz"
+        am_stat = "tts3/dump/train/speech_stats.npy"
+        phones_dict = "tts3/dump/phone_id_map.txt"
     # Init body.
     with open(am_config) as f:
         am_config = CfgNode(yaml.safe_load(f))

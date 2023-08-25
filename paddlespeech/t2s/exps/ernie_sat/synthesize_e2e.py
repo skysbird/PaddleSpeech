@@ -242,6 +242,7 @@ def get_mlm_output(wav_path: str,
     new_span_bdy = prep_feats_outs['new_span_bdy']
     old_span_bdy = prep_feats_outs['old_span_bdy']
 
+    print(type(erniesat_inference))
     out_mels = erniesat_inference(
         speech=batch['speech'],
         text=batch['text'],
@@ -410,6 +411,19 @@ if __name__ == '__main__':
             style=pypinyin.Style.TONE3,
             tone_sandhi=True)
         new_str = ' '.join(new_str)
+
+
+    if args.target_lang == 'thai':
+        from attacut import tokenize, Tokenizer
+        new_str = tokenize(new_str)
+
+        #new_str = pypinyin.lazy_pinyin(
+        #    new_str,
+        #    neutral_tone_with_five=True,
+        #    style=pypinyin.Style.TONE3,
+        #    tone_sandhi=True)
+        new_str = ' '.join(new_str)
+
 
     if args.task_name == 'edit':
         new_str = new_str

@@ -26,7 +26,7 @@ from paddlespeech.t2s.exps.ernie_sat.utils import get_tmp_name
 
 DICT_EN = 'tools/aligner/cmudict-0.7b'
 DICT_ZH = 'tools/aligner/simple.lexicon'
-DICT_THAI = 'tts3/mfa/thai/pretrain/thai_cv.dict'
+DICT_THAI = 'tts3/mfa/thai/pretrain/thai_mfa_c.dict'
 
 MODEL_DIR_EN = 'tools/aligner/vctk_model.zip'
 MODEL_DIR_ZH = 'tools/aligner/aishell3_model.zip'
@@ -217,11 +217,15 @@ def words2phns(text: str, lang='en'):
         if lang == 'en':
             wrd = wrd.upper()
         if (wrd not in ds):
+            print("not",wrd)
             wrd2phns[str(index) + '_' + wrd] = 'spn'
             phns.extend(['spn'])
         else:
             wrd2phns[str(index) + '_' + wrd] = word2phns_dict[wrd].split()
             phns.extend(word2phns_dict[wrd].split())
+
+    print(phns)
+    print(wrd2phns)
     return phns, wrd2phns
 
 
@@ -269,7 +273,8 @@ def get_phns_spans(wav_path: str,
             # clone 句子 
             phns_append, append_w2p_tmp = words2phns(str_append, lang=target_lang)
 
-            phns_append = "tɕʰ iː˦˥ s a˨˩ n a˦˥ n ʔ a˨˩ r ɔ˨˩ j d oː˧ j tɕʰ a˨˩ pʰ ɔ˦˥ ʔ j aː˨˩ ŋ j i˥˩ ŋ m ɯa˥˩ m aː˧ pʰ r ɔː˦˥ m k a˨˩ p̚ kʰ a˨˩ n o˩˩˦ m p a˧ ŋ s ɛː˩˩˦ n ʔ a˨˩ r ɔ˨˩ j k r ɔː˨˩ p̚".split(" ")
+            print(phns_append)
+            #phns_append = "tɕʰ iː˦˥ s a˨˩ n a˦˥ n ʔ a˨˩ r ɔ˨˩ j d oː˧ j tɕʰ a˨˩ pʰ ɔ˦˥ ʔ j aː˨˩ ŋ j i˥˩ ŋ m ɯa˥˩ m aː˧ pʰ r ɔː˦˥ m k a˨˩ p̚ kʰ a˨˩ n o˩˩˦ m p a˧ ŋ s ɛː˩˩˦ n ʔ a˨˩ r ɔ˨˩ j k r ɔː˨˩ p̚".split(" ")
 
             print("new phs=",phns_append)
 
